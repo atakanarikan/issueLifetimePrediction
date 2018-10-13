@@ -1,0 +1,8 @@
+dataset               | prec   pd     pf     F1     ROC
+----------------------+--------------------------------
+combinedbefore1       | 0.51   0.15   0.03   0.23   0.79
+combinedbefore14      | 0.71   0.64   0.11   0.68   0.83
+combinedbefore30      | 0.75   0.75   0.13   0.75   0.83
+combinedbefore7       | 0.66   0.63   0.11   0.64   0.83
+combinedbefore90      | 0.79   0.72   0.15   0.75   0.83
+
