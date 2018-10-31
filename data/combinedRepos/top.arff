@@ -1,4 +1,4 @@
-@relation combinedTop10Repos
+@relation top
 @attribute nissuesbycreator integer
 @attribute nissuesbycreatorclosed integer
 @attribute ncommitsbycreator integer

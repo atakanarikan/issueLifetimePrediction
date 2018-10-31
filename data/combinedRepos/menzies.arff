@@ -1,4 +1,4 @@
-@relation combined
+@relation menzies
 
 @attribute issuecleanedbodylen numeric
 @attribute ncommitsbycreator numeric

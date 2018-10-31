@@ -1,4 +1,4 @@
-@relation combinedRandom10Repos
+@relation random
 @attribute nissuesbycreator integer
 @attribute nissuesbycreatorclosed integer
 @attribute ncommitsbycreator integer
