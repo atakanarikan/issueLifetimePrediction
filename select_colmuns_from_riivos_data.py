@@ -135,7 +135,7 @@ class StudyRiivoData:
                 axis=1
             )
             arff.dump(
-                f'reposRandom/{name}.arff',
+                f'randomRepos/{name}.arff',
                 current.values,
                 relation=name,
                 names=current.columns

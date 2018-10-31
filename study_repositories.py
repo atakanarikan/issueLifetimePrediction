@@ -7,6 +7,9 @@ import glob
 
 FIXED_REPOSITORIES = '/home/arikan/thesis/code/github-issue-lifetime-prediction-master/data_and_code/issue_data/fixed_repos.csv'  # noqa
 FIXED_ISSUES = '/home/arikan/thesis/code/github-issue-lifetime-prediction-master/data_and_code/issue_data/fixed_issues.csv'  # noqa
+MENZIES_COMBINED = '/home/arikan/thesis/code/issue-lifetime-prediction-dl/data/menziesRepos/combined.arff'  # noqa
+TOP_REPOS_COMBINED = '/home/arikan/thesis/code/issue-lifetime-prediction-dl/data/topRepos/combined.arff'  # noqa
+RANDOM_REPOS_COMBINED = '/home/arikan/thesis/code/issue-lifetime-prediction-dl/data/randomRepos/combined.arff'  # noqa
 
 
 class RepositoryStudier:
@@ -15,10 +18,7 @@ class RepositoryStudier:
         # self.issues_df = pd.read_csv(FIXED_ISSUES, skipinitialspace=True)
         self.arff_files = self._collect_filenames(folder_path)
         # self.df = self._generate_repository_barplot()
-        self._plot_top_and_random_repos_combined_together(
-            '/home/arikan/thesis/code/issue-lifetime-prediction-dl/combined_random_10_repos.arff',  # noqa
-            '/home/arikan/thesis/code/issue-lifetime-prediction-dl/combined_top_10_repos.arff',  # noqa
-        )
+        self._plot_combined_repo_information_together()
         # print(self.df.columns.values)
         # self.number_of_issues_by_close_time = self.calculate_number_of_issues() # noqa
 
@@ -54,9 +54,16 @@ class RepositoryStudier:
             result[dataset.name] = arff_data
         plt.savefig(
             '/home/arikan/thesis/code/issue-lifetime-prediction-dl'
-            '/menziesResults/plots/combinedTogether.png'
+            '/out/plots/combinedTogether.png'
         )
         return 1
+
+    def _get_combined_data_frames(self):
+        random_repos = self._collect_dataframe_for_combined_files(RANDOM_REPOS_COMBINED, 'random')  # noqa
+        top_repos = self._collect_dataframe_for_combined_files(TOP_REPOS_COMBINED, 'top')  # noqa
+        menzies_repos = self._collect_dataframe_for_combined_files(MENZIES_COMBINED, 'menzies')  # noqa
+
+        return random_repos, top_repos, menzies_repos
 
     def _collect_dataframe_for_combined_files(self, filepath, dataset_name):
         combined = pd.DataFrame(loadarff(filepath)[0])
@@ -65,22 +72,21 @@ class RepositoryStudier:
         combined = combined.timeopen.value_counts().sort_index().to_frame()
         return combined.rename(index=str, columns={"timeopen": dataset_name})
 
-    def _plot_top_and_random_repos_combined_together(self, random, top):
-        random_repos = self._collect_dataframe_for_combined_files(random, 'random')  # noqa
-        top_repos = self._collect_dataframe_for_combined_files(top, 'top')
-        combined = pd.concat([random_repos, top_repos], axis=1)
+    def _plot_combined_repo_information_together(self):
+        random, top, menzies = self._get_combined_data_frames()
+        combined = pd.concat([random, top, menzies], axis=1)
         combined.plot(
             title='Combined Repositories',
             kind='bar',
-            secondary_y='top',
+            secondary_y=('top', 'menzies'),
             legend=True,
             figsize=(20, 15)
         )
         plt.show()
-        plt.savefig(
-            '/home/arikan/thesis/code/issue-lifetime-prediction-dl'
-            '/menziesResults/plots/combinedTogether.png'
-        )
+        # plt.savefig(
+        #     '/home/arikan/thesis/code/issue-lifetime-prediction-dl'
+        #     '/out/plots/combinedTogether.png'
+        # )
 
     def _generate_plot_and_save_it_to_out_file(
             self,
