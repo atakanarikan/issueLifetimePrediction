@@ -2,3 +2,6 @@ pandas
 arff
 matplotlib
 Pillow
+keras
+sklearn
+tensorflow
