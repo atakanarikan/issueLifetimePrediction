@@ -34,16 +34,21 @@ class DataPlotter:
         combined = pd.DataFrame(dataset[0])
         combined.timeopen = combined.timeopen.astype(int)
         combined.timeopen = pd.to_numeric(combined.timeopen)
-        combined = combined.timeopen.value_counts().sort_index().to_frame()
+        combined = combined.timeopen.value_counts().sort_index().to_frame().T
+        combined.columns = combined.columns.astype(str)
+        combined['90'] = (
+            combined['90'] + combined['180'] + combined['365'] + combined['1000']  # noqa
+        )
+        combined = combined.drop(['180', '365', '1000'], axis=1).T
         return combined.rename(index=str, columns={"timeopen": dataset[1].name})
 
     def plot(self, save=False, stacked=True, title=''):
         size = (15, 10) if save else None
-        filename = 'stacked.png' if stacked else 'sidebyside.png'
+        filename = 'distributionStacked.png' if stacked else 'distribution.png'
         if not stacked:
             columns = list(self.combined.columns.values)
             columns.pop()
-            self.combined.plot(
+            self.combined.T.plot(
                 title=title,
                 kind='bar',
                 legend=True,
@@ -51,7 +56,7 @@ class DataPlotter:
                 figsize=size
             )
         else:
-            self.combined.plot(
+            self.combined.T.plot(
                 title=title,
                 kind='bar',
                 legend=True,
@@ -80,5 +85,5 @@ class RepositorySetSelector:
         return list(self.issues_df.groupby('rid').count().sample(10)['rid'])
 
 
-DataPlotter('combinedRepos').plot(True, True, title='Combined Repositories')
+DataPlotter('riivo').plot(False, False, title='Combined All Repositories')
 
