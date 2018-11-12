@@ -5,6 +5,5 @@ Pillow
 keras
 sklearn
 tensorflow
-tensorflow-gpu
 Theano
 h5py
