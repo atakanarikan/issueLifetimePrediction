@@ -85,5 +85,5 @@ class RepositorySetSelector:
         return list(self.issues_df.groupby('rid').count().sample(10)['rid'])
 
 
-DataPlotter('riivo').plot(False, False, title='Combined All Repositories')
+DataPlotter('combined').plot(False, False, title='Combined All Repositories')
 
