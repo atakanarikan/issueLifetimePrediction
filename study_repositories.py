@@ -6,13 +6,12 @@ from scipy.io.arff import loadarff
 import glob
 
 FIXED_ISSUES = '/home/arikan/thesis/code/github-issue-lifetime-prediction-master/data_and_code/issue_data/fixed_issues.csv'  # noqa
-PROJECT_PATH = '/home/arikan/thesis/code/issue-lifetime-prediction-dl/'
 
 
 class DataPlotter:
     def __init__(self, folder_name):
-        in_path = os.path.join(PROJECT_PATH, 'data', folder_name)
-        self.out_path = os.path.join(PROJECT_PATH, 'out', 'plots', folder_name)
+        in_path = os.path.join(os.getcwd(), 'data', folder_name)
+        self.out_path = os.path.join(os.getcwd(), 'out', 'plots', folder_name)
         self.arff_files = self.collect_arff_filenames_in_the_folder(in_path)
         self.combined = self.get_combined_dataframe()
 
@@ -44,7 +43,7 @@ class DataPlotter:
 
     def plot(self, save=False, stacked=True, title=''):
         size = (15, 10) if save else None
-        filename = 'distributionStacked.png' if stacked else 'distribution.png'
+        filename = 'percentageStacked.png' if stacked else 'percentage.png'
         if not stacked:
             columns = list(self.combined.columns.values)
             columns.pop()
@@ -85,5 +84,11 @@ class RepositorySetSelector:
         return list(self.issues_df.groupby('rid').count().sample(10)['rid'])
 
 
-DataPlotter('combined').plot(False, False, title='Combined All Repositories')
-
+# DataPlotter('combined').plot(False, False, title='Combined All Repositories')
+dp = DataPlotter('combinedRepos')
+print(dp.combined)
+for column in dp.combined.columns:
+    total = dp.combined[column].sum()
+    dp.combined[column] = dp.combined[column].apply(lambda val: round((val / total) * 100, 2))
+print(dp.combined)
+dp.plot(True, False, title='Percentage of issue classes')
