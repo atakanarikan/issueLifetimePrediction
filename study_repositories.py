@@ -35,8 +35,16 @@ class DataPlotter:
         combined.timeopen = pd.to_numeric(combined.timeopen)
         combined = combined.timeopen.value_counts().sort_index().to_frame().T
         combined.columns = combined.columns.astype(str)
-        combined['90'] = (
-            combined['90'] + combined['180'] + combined['365'] + combined['1000']  # noqa
+        combined[' > 90'] = combined['180'] + combined['365'] + combined['1000']  # noqa
+        combined = combined.rename(
+            index=str,
+            columns={
+                "1": "< 1",
+                "7": "1 - 7",
+                "14": "7 - 14",
+                "30": "14 - 30",
+                "90": "30 - 90",
+            }
         )
         combined = combined.drop(['180', '365', '1000'], axis=1).T
         return combined.rename(index=str, columns={"timeopen": dataset[1].name})
@@ -91,4 +99,4 @@ for column in dp.combined.columns:
     total = dp.combined[column].sum()
     dp.combined[column] = dp.combined[column].apply(lambda val: round((val / total) * 100, 2))
 print(dp.combined)
-dp.plot(True, False, title='Percentage of issue classes')
+dp.plot(False, False, title='Percentage of issue classes')
