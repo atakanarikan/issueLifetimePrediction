@@ -8,7 +8,8 @@ import glob
 FIXED_ISSUES = '/home/arikan/thesis/code/github-issue-lifetime-prediction-master/data_and_code/issue_data/fixed_issues.csv'  # noqa
 
 
-class DataPlotter:
+class DataLoader:
+
     def __init__(self, folder_name):
         in_path = os.path.join(os.getcwd(), 'data', folder_name)
         self.out_path = os.path.join(os.getcwd(), 'out', 'plots', folder_name)
@@ -28,6 +29,13 @@ class DataPlotter:
         ]
         return pd.concat(dataframes, axis=1, sort=False)
 
+    def get_dataframe_by_dataset(self):
+        result = {}
+        for filepath in self.arff_files:
+            filename_without_extension = filepath.split("/")[-1].split('.')[0]
+            result[filename_without_extension] = pd.DataFrame(loadarff(filepath)[0]).astype(int)
+        return result
+
     def collect_dataframe_for_combined_files(self, filepath):
         dataset = loadarff(filepath)
         combined = pd.DataFrame(dataset[0])
@@ -35,7 +43,16 @@ class DataPlotter:
         combined.timeopen = pd.to_numeric(combined.timeopen)
         combined = combined.timeopen.value_counts().sort_index().to_frame().T
         combined.columns = combined.columns.astype(str)
-        combined[' > 90'] = combined['180'] + combined['365'] + combined['1000']  # noqa
+        existing_columns = []
+        if '180' in combined.columns.values:
+            combined[' > 90'] = combined['180']
+            existing_columns.append('180')
+        if '365' in combined.columns.values:
+            combined[' > 90'] = combined[' > 90'] + combined['365']
+            existing_columns.append('365')
+        if '1000' in combined.columns.values:
+            combined[' > 90'] = combined[' > 90'] + combined['365']
+            existing_columns.append('1000')
         combined = combined.rename(
             index=str,
             columns={
@@ -46,12 +63,15 @@ class DataPlotter:
                 "90": "30 - 90",
             }
         )
-        combined = combined.drop(['180', '365', '1000'], axis=1).T
+        combined = combined.drop(existing_columns, axis=1).T
         return combined.rename(index=str, columns={"timeopen": dataset[1].name})
 
-    def plot(self, save=False, stacked=True, title=''):
+
+class DataPlotter(DataLoader):
+
+    def plot(self, save=False, stacked=True, title='', prefix=''):
         size = (15, 10) if save else None
-        filename = 'percentageStacked.png' if stacked else 'percentage.png'
+        filename = f'{prefix}Stacked.png' if stacked else f'{prefix}.png'
         if not stacked:
             columns = list(self.combined.columns.values)
             columns.pop()
@@ -76,6 +96,15 @@ class DataPlotter:
             plt.show()
 
 
+class DataStudier(DataLoader):
+
+    def get_training_details_for_datasets(self):
+        for dataset, dataframe in self.get_dataframe_by_dataset().items():
+            df = dataframe.timeopen.value_counts()
+            col1, col2 = dataframe.timeopen.value_counts().sort_index().to_frame().T.columns.values
+            print(f"{dataset}\t {df[col1]}\t{df[col2]}")
+
+
 class RepositorySetSelector:
 
     def __init__(self):
@@ -92,11 +121,11 @@ class RepositorySetSelector:
         return list(self.issues_df.groupby('rid').count().sample(10)['rid'])
 
 
-# DataPlotter('combined').plot(False, False, title='Combined All Repositories')
-dp = DataPlotter('combinedRepos')
-print(dp.combined)
-for column in dp.combined.columns:
-    total = dp.combined[column].sum()
-    dp.combined[column] = dp.combined[column].apply(lambda val: round((val / total) * 100, 2))
-print(dp.combined)
-dp.plot(False, False, title='Percentage of issue classes')
+dp = DataPlotter('randomRepos')
+dp.plot(save=True, stacked=False, title='Combined All Repositories', prefix='distribution')
+dp.plot(save=True, stacked=True, title='Combined All Repositories', prefix='distribution')
+# for column in dp.combined.columns:
+#     total = dp.combined[column].sum()
+#     dp.combined[column] = dp.combined[column].apply(lambda val: round((val / total) * 100, 2))
+# dp.plot(save=True, stacked=True, title='Percentage of issue classes', prefix='percentage')
+# dp.plot(save=True, stacked=False, title='Percentage of issue classes', prefix='percentage')
