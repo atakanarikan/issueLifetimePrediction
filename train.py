@@ -100,11 +100,12 @@ class IssueCloseTimeClassifier:
         )
 
     def do_cross_validation_on_model(self):
-        for train_indexes, test_indexes in KFold(n_splits=10).split(self.dataframe):
+        for train_indexes, test_indexes in KFold(n_splits=2).split(self.dataframe):
             train = self.dataframe.iloc[train_indexes, :]
             test = self.dataframe.iloc[test_indexes, :]
             self.train(x=train.iloc[:, :7], y=train['timeopen'])
             print(self.evaluate_and_get_results(test.iloc[:, :7], test['timeopen']))
+            self.save_to_file('model.h5')
             self.calculate_results(train.iloc[:, :7], test['timeopen'])
         self.print_results()
 
@@ -120,7 +121,7 @@ def process_all_before_classes_in_given_folder(folder_name):
 
 
 # process_all_before_classes_in_given_folder('topRepos')
-filepath = f"{os.getcwd()}/data/combinedRepos/beforeClass/topbefore90.arff"
+filepath = f"{os.getcwd()}/data/combinedRepos/beforeClass/menziesbefore90.arff"
 filename_without_extension = filepath.split("/")[-1].split('.')[0]
 time_class = re.match('.*?([0-9]+)$', filename_without_extension).group(1)
 classifier = IssueCloseTimeClassifier(in_file=filepath, time_class=time_class)

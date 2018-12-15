@@ -121,11 +121,9 @@ class RepositorySetSelector:
         return list(self.issues_df.groupby('rid').count().sample(10)['rid'])
 
 
-dp = DataPlotter('randomRepos')
-dp.plot(save=True, stacked=False, title='Combined All Repositories', prefix='distribution')
-dp.plot(save=True, stacked=True, title='Combined All Repositories', prefix='distribution')
-# for column in dp.combined.columns:
-#     total = dp.combined[column].sum()
-#     dp.combined[column] = dp.combined[column].apply(lambda val: round((val / total) * 100, 2))
-# dp.plot(save=True, stacked=True, title='Percentage of issue classes', prefix='percentage')
-# dp.plot(save=True, stacked=False, title='Percentage of issue classes', prefix='percentage')
+dp = DataPlotter('riivo')
+print(dp.combined)
+for column in dp.combined.columns:
+    total = dp.combined[column].sum()
+    dp.combined[column] = dp.combined[column].apply(lambda val: round((val / total) * 100, 2))
+print(dp.combined)
