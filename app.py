@@ -1,13 +1,37 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from keras.models import load_model
 import numpy as np
 import tensorflow as tf
 import os
 model_file = ''
+models_by_dataset = {
+    'riivo': {},
+    'random': {},
+    'top': {},
+    'menzies': {}
+}
 app = Flask(__name__)
 
 
-def predict_classes(given_issue_values):
+def load_models():
+    for dataset in ['menzies', 'random', 'top']:
+        models_by_dataset[dataset] = {
+            '1': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before1.h5'),
+            '7': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before7.h5'),
+            '14': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before14.h5'),
+            '30': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before30.h5'),
+            '90': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before90.h5')
+        }
+    # models_by_dataset['riivo'] = {
+    #     '1': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore1.h5'),
+    #     '7': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore7.h5'),
+    #     '14': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore14.h5'),
+    #     '30': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore30.h5'),
+    #     '90': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore90.h5')
+    # }
+
+
+def predict_classes(dataset, given_issue_values):
     result = {
         '1': {},
         '7': {},
@@ -15,26 +39,23 @@ def predict_classes(given_issue_values):
         '30': {},
         '90': {},
     }
-    result1 = model1.predict_classes([[given_issue_values]])[0]
-    result7 = model7.predict_classes([[given_issue_values]])[0]
-    result14 = model14.predict_classes([[given_issue_values]])[0]
-    result30 = model30.predict_classes([[given_issue_values]])[0]
-    result90 = model90.predict_classes([[given_issue_values]])[0]
-    result['1']['before'] = '✓' if result1 == 0 else ''
-    result['1']['after'] = '✓' if result1 == 1 else ''
-    result['7']['before'] = '✓' if result7 == 0 else ''
-    result['7']['after'] = '✓' if result7 == 1 else ''
-    result['14']['before'] = '✓' if result14 == 0 else ''
-    result['14']['after'] = '✓' if result14 == 1 else ''
-    result['30']['before'] = '✓' if result30 == 0 else ''
-    result['30']['after'] = '✓' if result30 == 1 else ''
-    result['90']['before'] = '✓' if result90 == 0 else ''
-    result['90']['after'] = '✓' if result90 == 1 else ''
+    for timeclass, model in models_by_dataset[dataset].items():
+        prediction = model.predict_classes([[given_issue_values]])[0]
+        result[timeclass]['before'] = '✓' if prediction == 0 else ''
+        result[timeclass]['after'] = '✓' if prediction == 1 else ''
     return result
 
 
 @app.route('/', methods=['GET'])
-def predict_issue_lifetime():
+def homepage():
+    dataset = request.args.get('dataset')
+    if dataset:
+        return redirect(f'/{dataset}')
+    return render_template('index.html')
+
+
+@app.route('/<dataset>', methods=['GET'])
+def predict_issue_lifetime(dataset):
     context = {
         'issueCleanedBodyLen': request.args.get('issueCleanedBodyLen', 0),
         'nCommitsByCreator': request.args.get('nCommitsByCreator', 0),
@@ -54,16 +75,14 @@ def predict_issue_lifetime():
         context['nIssuesCreatedInProjectClosed'],
     ])
     with graph.as_default():
-        context['results'] = predict_classes(given_issue_values)
+        context['results'] = predict_classes(dataset, given_issue_values)
         return render_template('form.html', **context)
 
 
 if __name__ == '__main__':
-    model1 = load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/menziesbefore1.h5')
-    model7 = load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/menziesbefore7.h5')
-    model14 = load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/menziesbefore14.h5')
-    model30 = load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/menziesbefore30.h5')
-    model90 = load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/menziesbefore90.h5')
+    print('Loading models...')
+    load_models()
+    print('Done!')
     global graph
     graph = tf.get_default_graph()
     app.run(port=8000, debug=True)

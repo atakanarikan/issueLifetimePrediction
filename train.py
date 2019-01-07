@@ -56,7 +56,7 @@ class IssueCloseTimeClassifier:
         return cnn
 
     def train(self, x, y):
-        return self.model.fit(x=x, y=y, epochs=5, batch_size=10, verbose=0)
+        return self.model.fit(x=x, y=y, epochs=20, batch_size=10, verbose=1)
 
     def save_to_file(self, filepath):
         self.model.save(filepath)
@@ -105,9 +105,11 @@ class IssueCloseTimeClassifier:
             test = self.dataframe.iloc[test_indexes, :]
             self.train(x=train.iloc[:, :7], y=train['timeopen'])
             print(self.evaluate_and_get_results(test.iloc[:, :7], test['timeopen']))
-            self.save_to_file('model.h5')
-            self.calculate_results(train.iloc[:, :7], test['timeopen'])
-        self.print_results()
+            self.save_to_file(
+                f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore{self.time_class}.h5'
+            )
+            # self.calculate_results(train.iloc[:, :7], test['timeopen'])
+        # self.print_results()
 
 
 def process_all_before_classes_in_given_folder(folder_name):
@@ -120,9 +122,4 @@ def process_all_before_classes_in_given_folder(folder_name):
         classifier.do_cross_validation_on_model()
 
 
-# process_all_before_classes_in_given_folder('topRepos')
-filepath = f"{os.getcwd()}/data/combinedRepos/beforeClass/menziesbefore90.arff"
-filename_without_extension = filepath.split("/")[-1].split('.')[0]
-time_class = re.match('.*?([0-9]+)$', filename_without_extension).group(1)
-classifier = IssueCloseTimeClassifier(in_file=filepath, time_class=time_class)
-classifier.do_cross_validation_on_model()
+process_all_before_classes_in_given_folder('riivo')

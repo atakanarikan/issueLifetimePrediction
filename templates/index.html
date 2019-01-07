@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="modal-body row">
+    <form class="form">
+        <div class="form-inline">
+            <label for="dataset">dataset:</label>
+            <input
+                    type="search"
+                    class="form-control"
+                    id="dataset"
+                    name="dataset"
+            >
+            <button type="submit" id="selectDataset" class="btn btn-default">select</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
