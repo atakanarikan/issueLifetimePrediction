@@ -22,13 +22,13 @@ def load_models():
             '30': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before30.h5'),
             '90': load_model(f'{os.getcwd()}/out/models/combinedRepos/beforeClass/{dataset}before90.h5')
         }
-    # models_by_dataset['riivo'] = {
-    #     '1': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore1.h5'),
-    #     '7': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore7.h5'),
-    #     '14': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore14.h5'),
-    #     '30': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore30.h5'),
-    #     '90': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore90.h5')
-    # }
+    models_by_dataset['riivo'] = {
+        '1': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore1.h5'),
+        '7': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore7.h5'),
+        '14': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore14.h5'),
+        '30': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore30.h5'),
+        '90': load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore90.h5')
+    }
 
 
 def predict_classes(dataset, given_issue_values):

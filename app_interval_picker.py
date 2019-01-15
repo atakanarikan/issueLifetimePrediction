@@ -7,7 +7,7 @@ import threading
 class IntervalPicker:
 
     def __init__(self):
-        self.limit = 50
+        self.limit = 150
         self.models = [
             load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore1.h5'),
             load_model(f'{os.getcwd()}/out/models/riivo/beforeClass/riivobefore7.h5'),
@@ -25,9 +25,9 @@ class IntervalPicker:
         )
 
     def get_random_valid_starting_point(self):
-        candidate = np.random.randint(0, 1000, 7)
+        candidate = self.generate_seed()
         while not self.is_prediction_valid(self.predict_classes(candidate)):
-            candidate = np.random.randint(0, 1000, 7)
+            candidate = self.generate_seed()
         return [int(nummer) for nummer in candidate]
 
     def is_prediction_valid(self, predictions):
@@ -62,6 +62,12 @@ class IntervalPicker:
                     self.are_intervals_valid(intervals[:i] + [value] + intervals[i + 1:])
                     for value in range(elem[0], elem[1] + 1, 5)
                 )
+
+    def generate_seed(self):
+        while True:
+            candidate = np.random.randint(150, 1000, 7)
+            if candidate[5] > candidate[6] > candidate[3] > candidate[4] and candidate[2] > candidate[1]:
+                return candidate
 
 
 ip = IntervalPicker()
